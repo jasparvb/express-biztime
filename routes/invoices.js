@@ -73,7 +73,7 @@ router.put('/:id', async function (req, res, next) {
             [amt, id]
         );
         if (result.rows.length === 0){
-            throw new ExpressError("No company found with that code", 404);
+            throw new ExpressError("No invoice found with that id", 404);
         }
         return res.json({invoice: result.rows[0]});
     } catch (e) {
@@ -81,5 +81,22 @@ router.put('/:id', async function (req, res, next) {
     }
 });
 
+router.delete("/:id", async function (req, res, next) {
+    try {
+        let id = req.params.id;
+        const result = await db.query(
+            `DELETE FROM invoices 
+            WHERE id = $1
+            RETURNING id`,
+            [id]
+        );
+        if (result.rows.length === 0){
+            throw new ExpressError("No invoice found with that id", 404);
+        }
+        return res.json({status: "Deleted"});
+    } catch (e) {
+        return next(e);
+    }
+});
 
 module.exports = router;
