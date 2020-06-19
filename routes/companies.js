@@ -22,10 +22,18 @@ router.get('/:code', async function (req, res, next) {
             WHERE code = $1`, 
             [code]
         );
+        const invoices = await db.query(
+            `SELECT id
+            FROM invoices 
+            WHERE comp_code = $1`, 
+            [code]
+        );
         if (result.rows.length === 0){
             throw new ExpressError("No company found with that code", 404);
         }
-        return res.json({company: result.rows});
+        let company = result.rows[0];
+        company.invoices = invoices.rows.map(inv => inv.id);
+        return res.json({company});
     } catch (e) {
         return next(e);
     }
