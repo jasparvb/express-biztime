@@ -61,5 +61,25 @@ router.post('', async function (req, res, next) {
     }
 });
 
+router.put('/:id', async function (req, res, next) {
+    try {
+        let id = req.params.id;
+        const { amt } = req.body;
+        const result = await db.query(
+            `UPDATE invoices 
+            SET amt=$1 
+            WHERE id = $2 
+            RETURNING id, comp_code, amt, paid, add_date, paid_date`, 
+            [amt, id]
+        );
+        if (result.rows.length === 0){
+            throw new ExpressError("No company found with that code", 404);
+        }
+        return res.json({invoice: result.rows[0]});
+    } catch (e) {
+        return next(e);
+    }
+});
+
 
 module.exports = router;
